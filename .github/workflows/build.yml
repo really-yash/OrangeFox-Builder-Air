@@ -1,1 +1,27 @@
+name: OrangeFox - Builder
+on:
+  workflow_dispatch:
 
+jobs:
+  build:
+    name: 🦊 Building OrangeFox Recovery
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: OrangeFox Build
+        uses: UWU-TEAM/UWU-OrangeFox-Builder@v1.0.0
+        with:
+          USER_NAME: 'Yash'
+          USER_EMAIL: 'yash@example.com'
+          DEVICE_TREE: 'https://github.com/really-yash/twrp_device_xiaomi_air'
+          DEVICE_TREE_BRANCH: 'twrp-16.0' 
+          DEVICE_PATH: 'device/xiaomi/air'
+          DEVICE_NAME: 'air'
+          BUILD_TARGET: 'vendor_boot'
+          GH_RELEASE: 'true'
