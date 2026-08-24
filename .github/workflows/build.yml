@@ -14,14 +14,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         
+      - name: Download missing DTB and Kernel
+        run: |
+          mkdir -p downloaded_files
+          wget "https://github.com/ChkDumps/redmi_air_dump/raw/refs/heads/missi-user-15-AP3A.240905.015.A2-OS2.0.205.0.VGQMIXM-release-keys/vendor_boot/dtb/01_dtbdump_MT6835.dtb" -O downloaded_files/mt6835.dtb
+          wget "https://github.com/ChkDumps/redmi_air_dump/raw/refs/heads/missi-user-15-AP3A.240905.015.A2-OS2.0.205.0.VGQMIXM-release-keys/boot/kernel" -O downloaded_files/Image.gz
+
       - name: OrangeFox Build
         uses: UWU-TEAM/UWU-OrangeFox-Builder@v1.0.0
         with:
           USER_NAME: 'Yash'
-          USER_EMAIL: 'yash@example.com'
+          USER_EMAIL: 'bloxfruits_yash@example.com'
           DEVICE_TREE: 'https://github.com/really-yash/twrp_device_xiaomi_air'
           DEVICE_TREE_BRANCH: 'twrp-16.0' 
           DEVICE_PATH: 'device/xiaomi/air'
           DEVICE_NAME: 'air'
           BUILD_TARGET: 'vendorboot'
           GH_RELEASE: 'true'
+          EXTRA_CMD: 'mkdir -p device/xiaomi/air/dtb && cp ../../downloaded_files/mt6835.dtb device/xiaomi/air/dtb/ && cp ../../downloaded_files/Image.gz device/xiaomi/air/'
