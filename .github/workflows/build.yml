@@ -1,20 +1,17 @@
-name: OrangeFox - Builder
+name: OrangeFox - Custom Native Builder
+
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
-    name: 🦊 Building OrangeFox Recovery
-    runs-on: ubuntu-latest
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    permissions:
-      contents: write
+    name: 🦊 Compile OrangeFox (Native)
+    runs-on: ubuntu-20.04
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Free up disk space (Prevent Storage Full)
+      - name: Cleanup Disk Space (Storage Fix)
         uses: jlumbroso/free-disk-space@main
         with:
           tool-cache: true
@@ -25,20 +22,58 @@ jobs:
           docker-images: true
           swap-storage: false
 
-      - name: Set up Swap Space (Prevent OOM Kill)
+      - name: Setup Swap Space (OOM Fix)
         uses: pierotofy/set-swap-space@master
         with:
           swap-size-gb: 8
 
-      - name: OrangeFox Build
-        uses: UWU-TEAM/UWU-OrangeFox-Builder@v1.0.0
+      - name: Setup Build Environment
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git-core gnupg flex bison build-essential zip curl zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 lib32ncurses5-dev x11proto-core-dev libx11-dev lib32z1-dev libgl1-mesa-dev libxml2-utils xsltproc unzip fontconfig python2 python3
+
+      - name: Install Repo Tool
+        run: |
+          mkdir -p ~/bin
+          curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
+          chmod a+x ~/bin/repo
+          sudo cp ~/bin/repo /usr/local/bin/repo
+
+      - name: Initialize & Sync OrangeFox Manifest
+        run: |
+          mkdir ~/OrangeFox
+          cd ~/OrangeFox
+          git config --global user.name "Yash"
+          git config --global user.email "bloxfruits_yash@example.com"
+          repo init -u https://gitlab.com/OrangeFox/Manifest.git -b fox_12.1 --depth=1
+          repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags
+
+      - name: Clone Device Tree
+        run: |
+          cd ~/OrangeFox
+          git clone https://github.com/really-yash/twrp_device_xiaomi_air.git -b twrp-16.0 device/xiaomi/air
+
+      - name: Patch mkbootimg (The Bug Fix)
+        run: |
+          cd ~/OrangeFox
+          echo "Overwriting outdated mkbootimg to fix vendor_ramdisk_fragment errors..."
+          wget https://raw.githubusercontent.com/aosp-mirror/platform_system_tools_mkbootimg/master/mkbootimg.py -O system/tools/mkbootimg/mkbootimg.py
+          chmod +x system/tools/mkbootimg/mkbootimg.py
+
+      - name: Compile OrangeFox
+        run: |
+          cd ~/OrangeFox
+          source build/envsetup.sh
+          export ALLOW_MISSING_DEPENDENCIES=true
+          export FOX_USE_TWRP_RECOVERY_IMAGE_BUILDER=1
+          export LC_ALL="C"
+          lunch twrp_air-eng
+          mka vendorbootimage
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
         with:
-          FOX_SYNC_BRANCH: '12.1'
-          USER_NAME: 'Yash'
-          USER_EMAIL: 'bloxfruits_yash@example.com'
-          DEVICE_TREE: 'https://github.com/really-yash/twrp_device_xiaomi_air'
-          DEVICE_TREE_BRANCH: 'twrp-16.0'
-          DEVICE_PATH: 'device/xiaomi/air'
-          DEVICE_NAME: 'air'
-          BUILD_TARGET: 'vendorboot'
-          GH_RELEASE: 'true'
+          name: OrangeFox-Recovery-Air
+          path: |
+            ~/OrangeFox/out/target/product/air/OrangeFox*.zip
+            ~/OrangeFox/out/target/product/air/vendor_boot.img
