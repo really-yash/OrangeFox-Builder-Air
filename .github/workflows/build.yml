@@ -39,5 +39,5 @@ jobs:
           DEVICE_TREE_BRANCH: 'twrp-16.0' 
           DEVICE_PATH: 'device/xiaomi/air'
           DEVICE_NAME: 'air'
-          BUILD_TARGET: 'vendorbootimage'
+          BUILD_TARGET: 'vendorboot'
           GH_RELEASE: 'true'
