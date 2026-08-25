@@ -13,30 +13,31 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Free up disk space (Prevent Storage Full)
         uses: jlumbroso/free-disk-space@main
         with:
           tool-cache: true
-          android: true 
+          android: true
           dotnet: true
           haskell: true
           large-packages: true
           docker-images: true
           swap-storage: false
-          
+
       - name: Set up Swap Space (Prevent OOM Kill)
         uses: pierotofy/set-swap-space@master
         with:
           swap-size-gb: 8
-        
+
       - name: OrangeFox Build
         uses: UWU-TEAM/UWU-OrangeFox-Builder@v1.0.0
         with:
+          MANIFEST_BRANCH: '12.1'
           USER_NAME: 'Yash'
           USER_EMAIL: 'bloxfruits_yash@example.com'
           DEVICE_TREE: 'https://github.com/really-yash/twrp_device_xiaomi_air'
-          DEVICE_TREE_BRANCH: 'twrp-16.0' 
+          DEVICE_TREE_BRANCH: 'twrp-16.0'
           DEVICE_PATH: 'device/xiaomi/air'
           DEVICE_NAME: 'air'
           BUILD_TARGET: 'vendorboot'
