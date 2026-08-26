@@ -40,5 +40,36 @@ jobs:
           DEVICE_TREE_BRANCH: 'twrp-16.0'
           DEVICE_PATH: 'device/xiaomi/air'
           DEVICE_NAME: 'air'
-          BUILD_TARGET: 'recovery'
+          BUILD_TARGET: 'vendorboot'
           GH_RELEASE: 'true'
+
+      - name: Verify Build Output Is Real (Not Corrupted/Empty)
+        run: |
+          OUT_DIR="/home/runner/work/_actions/really-yash/UWU-OrangeFox-Builder/main/OrangeFox/fox_12.1/out/target/product/air"
+          echo "==== Output directory listing ===="
+          ls -la "$OUT_DIR" || { echo "::error::Output directory not found — build likely failed silently!"; exit 1; }
+
+          echo "==== File sizes ===="
+          du -h "$OUT_DIR"/*.img "$OUT_DIR"/*.zip 2>/dev/null
+
+          echo "==== SHA256 checksums ===="
+          sha256sum "$OUT_DIR"/*.img "$OUT_DIR"/*.zip 2>/dev/null
+
+          echo "==== Sanity check: vendor_boot.img must exist and be a real size ===="
+          if [ ! -f "$OUT_DIR/vendor_boot.img" ]; then
+            echo "::error::vendor_boot.img is MISSING. The build did not actually produce a recovery image!"
+            exit 1
+          fi
+          SIZE=$(stat -c%s "$OUT_DIR/vendor_boot.img")
+          echo "vendor_boot.img size: $SIZE bytes"
+          if [ "$SIZE" -lt 5000000 ]; then
+            echo "::error::vendor_boot.img is only $SIZE bytes — this is too small to be a real image. Likely corrupted or empty!"
+            exit 1
+          fi
+          echo "✅ vendor_boot.img looks like a real, non-empty image."
+
+      - name: Upload Raw vendor_boot.img for Boot Testing
+        uses: actions/upload-artifact@v4
+        with:
+          name: air-vendor_boot-raw
+          path: /home/runner/work/_actions/really-yash/UWU-OrangeFox-Builder/main/OrangeFox/fox_12.1/out/target/product/air/vendor_boot.img
