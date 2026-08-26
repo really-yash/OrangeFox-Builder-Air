@@ -42,6 +42,8 @@ jobs:
           DEVICE_NAME: 'air'
           BUILD_TARGET: 'vendorboot'
           GH_RELEASE: 'true'
+          TG_TOKEN: ${{ secrets.TG_TOKEN }}
+          TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
 
       - name: Verify Build Output Is Real (Not Corrupted/Empty)
         run: |
