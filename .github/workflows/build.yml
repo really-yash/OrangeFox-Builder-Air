@@ -28,7 +28,7 @@ jobs:
       - name: Set up Swap Space (Prevent OOM Kill)
         uses: pierotofy/set-swap-space@master
         with:
-          swap-size-gb: 8
+          swap-size-gb: 16
 
       - name: OrangeFox Build
         uses: really-yash/UWU-OrangeFox-Builder@main
