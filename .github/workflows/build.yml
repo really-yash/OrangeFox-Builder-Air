@@ -28,26 +28,24 @@ jobs:
       - name: Set up Swap Space (Prevent OOM Kill)
         uses: pierotofy/set-swap-space@master
         with:
-          swap-size-gb: 16
+          swap-size-gb: 8
 
       - name: OrangeFox Build
         uses: really-yash/UWU-OrangeFox-Builder@main
         with:
-          FOX_SYNC_BRANCH: '14.1'
+          FOX_SYNC_BRANCH: '12.1'
           USER_NAME: 'Yash'
           USER_EMAIL: 'bloxfruits_yash@example.com'
           DEVICE_TREE: 'https://github.com/really-yash/twrp_device_xiaomi_air'
           DEVICE_TREE_BRANCH: 'twrp-16.0'
           DEVICE_PATH: 'device/xiaomi/air'
           DEVICE_NAME: 'air'
-          BUILD_TARGET: 'vendorboot'
+          BUILD_TARGET: 'recovery'
           GH_RELEASE: 'true'
-          TG_TOKEN: ${{ secrets.TG_TOKEN }}
-          TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
 
       - name: Verify Build Output Is Real (Not Corrupted/Empty)
         run: |
-          OUT_DIR="/home/runner/work/_actions/really-yash/UWU-OrangeFox-Builder/main/OrangeFox/fox_14.1/out/target/product/air"
+          OUT_DIR="/home/runner/work/_actions/really-yash/UWU-OrangeFox-Builder/main/OrangeFox/fox_12.1/out/target/product/air"
           echo "==== Output directory listing ===="
           ls -la "$OUT_DIR" || { echo "::error::Output directory not found — build likely failed silently!"; exit 1; }
 
@@ -74,4 +72,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: air-vendor_boot-raw
-          path: /home/runner/work/_actions/really-yash/UWU-OrangeFox-Builder/main/OrangeFox/fox_14.1/out/target/product/air/vendor_boot.img
+          path: /home/runner/work/_actions/really-yash/UWU-OrangeFox-Builder/main/OrangeFox/fox_12.1/out/target/product/air/vendor_boot.img
